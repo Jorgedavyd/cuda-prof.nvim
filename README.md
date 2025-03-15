@@ -4,7 +4,7 @@
 # cuda-prof.nvim
 ###### A NVIDIA CUDA Profiling Tools wrapper for Neovim.
 
-[![Neovim](https://img.shields.io/badge/Neovim-green.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
+[![Neovim](https://img.shields.io/badge/Neovim-blue.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
 [![CUDA](https://img.shields.io/badge/CUDA-green.svg?style=for-the-badge&logo=nvidia)](https://neovim.io)
 
 <img height="480" src="/assets/cuda-prof-logo.png" />
