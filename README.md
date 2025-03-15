@@ -1,6 +1,5 @@
 <div align="center">
 
-
 # cuda-prof.nvim
 ###### A NVIDIA CUDA Profiling Tools wrapper for Neovim.
 <img height="480" src="/assets/cuda-prof-logo.png" />
@@ -21,11 +20,19 @@
 ```lua
 return {
     "Jorgedavyd/cuda-prof.nvim",
-    config = function() end,
+    config = function()
+    end,
     keymap = {}
 }
 ```
 
-# Functionalities
+# Default
 
+```lua
+local config = {
+
+}
+```
+
+# Functionalities
 
