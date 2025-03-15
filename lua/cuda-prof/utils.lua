@@ -9,6 +9,7 @@ setmetatable(M,
     {
         __index = function (_, key)
             return function (msg)
+                msg = string.format("CudaProf -> %s ", msg)
                 vim.notify(msg, vim.log.levels[key], {})
             end
         end
