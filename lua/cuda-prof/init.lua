@@ -8,7 +8,7 @@ setmetatable(M, {
     ---@private
     ---@return CudaProfConfig?
     __index = function (_, k)
-        if k=="M" then
+        if k=="config" then
             return {
                 session = {
                     ---@class CudaSessionWindowConfig
@@ -20,8 +20,10 @@ setmetatable(M, {
                         style = "minimal",
                         border = "single"
                     },
-                    ---@class CudaSessionKeymaps
-                    keymaps = {}
+                    keymaps = function (bufnr)
+                        _ = bufnr
+                        utils.LogNotImplemented("Session Keymaps")
+                    end
                 },
                 extensions = {
                     telescope = {},

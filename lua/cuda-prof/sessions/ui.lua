@@ -46,8 +46,6 @@ function M:close_menu()
     self.status = false
 end
 
---- TODO: Toggle_opts should be where we get extra style and border options
---- and we should create a nice minimum window
 ---@param opts CudaProfWindowConfig
 ---@return number,number
 function M:_create_window(opts)
@@ -91,13 +89,6 @@ function M:toggle_quick_menu(list, opts)
     self.bufnr = bufnr
 
     vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, list)
-
-    Extensions.extensions:emit(Extensions.event_names.UI_CREATE, {
-        win_id = win_id,
-        bufnr = bufnr,
-        current_file = current_file,
-        contents = contents,
-    })
 end
 
 function M:_get_processed_ui_contents()
@@ -114,7 +105,7 @@ function M:save()
     if self.config.sync_on_ui_close then
         require("harpoon"):sync()
     end
-end
+vpend
 
 ---@param config CudaProfWindowConfig
 function M:configure(config)
