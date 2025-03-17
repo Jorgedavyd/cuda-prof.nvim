@@ -1,57 +1,57 @@
 local utils = require("cuda-prof.utils")
-local broker = require("cuda-prof.sessions.broker")
-
----@class CudaProfWindowConfig
----@field border? any this value is directly passed to nvim_open_win
----@field title_pos? any this value is directly passed to nvim_open_win
----@field title? string this value is directly passed to nvim_open_win
----@field height_in_lines? number this value is directly passed to nvim_open_win
----@field width_in_columns? number this value is directly passed to nvim_open_win
----@field style? string this value is directly passed to nvim_open_win
 
 ---@class CudaProfUI
 ---@field win_id number
 ---@field status boolean
----@field buf_id number
+---@field bufnr number
 ---@field config CudaProfWindowConfig
+---@field open_menu fun(opts: CudaProfWindowConfig): nil
+---@field close_menu fun(): nil
+---@field create_buffer fun(keymap: fun(bufnr: integer): nil): nil
+---@field import fun(opts: CudaProfSessionConfig): nil
+---@field save fun(): nil
 local M = {}
 
-M.__index = M
-
----@param config CudaProfWindowConfig
----@return CudaProfUI
-function M:new(config)
-    return setmetatable({
-        win_id = nil,
-        status = 0,
-        bufnr = nil,
-        config = config,
-    }, self)
-end
-
-function M:close_menu()
-    if not self.status then
+---@private
+function M.close_menu()
+    if not M.status then
         return
     end
-    if self.bufnr ~= nil and vim.api.nvim_buf_is_valid(self.bufnr) then
-        vim.api.nvim_buf_delete(self.bufnr, { force = true })
+    if M.bufnr ~= nil and vim.api.nvim_buf_is_valid(M.bufnr) and M.win_id ~= nil and vim.api.nvim_win_is_valid(M.win_id) then
+        --- check if the contents are valid with the manager
+        vim.api.nvim_win_close(M.win_id, true)
     end
-
-    if self.win_id ~= nil and vim.api.nvim_win_is_valid(self.win_id) then
-        vim.api.nvim_win_close(self.win_id, true)
-    end
-
-    self.win_id = nil
-    self.bufnr = nil
-    self.status = false
+    M.win_id = nil
+    M.status = false
 end
 
+--- Opens the interactive session
+---@private
 ---@param opts CudaProfWindowConfig
----@return number,number
-function M:_create_window(opts)
+---@return nil
+function M.open_menu(opts)
+    if M.status then
+        return
+    end
+    local win_id
+    if M.bufnr ~= nil and vim.api.nvim_buf_is_valid(M.bufnr) then
+        win_id = vim.api.nvim_open_win(M.bufnr, true, M.getWindowOpts(opts))
+    end
+    if win_id == 0 or win_id == nil then
+        utils.LogError("ui:_create_window failed to create window, win_id returned 0\n Failed to create window")
+    end
+    M.win_id = win_id
+    vim.api.nvim_set_option_value("number", true, {
+        win = win_id,
+    })
+end
+
+---@private
+---@param opts CudaProfWindowConfig
+---@return CudaProfWindowConfig
+function M.getWindowOpts(opts)
     local width = opts.width_in_columns
     local height = opts.height_in_lines or 8
-    local bufnr = vim.api.nvim_create_buf(false, true)
     opts.width_in_columns = nil
     opts.height_in_lines = nil
     opts = vim.tbl_deep_extend('error', {
@@ -61,55 +61,88 @@ function M:_create_window(opts)
         width = width,
         height = height,
     }, opts)
-    local win_id = vim.api.nvim_open_win(bufnr, true, opts)
+    return opts
+end
 
-    if win_id == 0 then
-        utils.LogError("ui:_create_window failed to create window, win_id returned 0\n Failed to create window")
-        self.bufnr = bufnr
+---@private
+---@param keymap fun(bufnr: integer): nil?
+---@return number
+function M.create_buffer(keymap)
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    M.setup_autocmds_and_keymaps(bufnr, keymap)
+    return bufnr
+end
+
+--- Auto command that imports the history to a newly created buffer on VimEnter
+---@param opts CudaProfSessionConfig
+function M.import(opts)
+    M.create_buffer(opts.keymaps)
+    --- feed with the history
+    --- check history of changes
+    --- Log information
+end
+
+--- Implements saving into .cuda-prof_history (VimLeave)
+function M.save()
+    --- Get all lines from buffer
+    --- Check all lines from buffer
+    --- Filter all lines from buffer
+    --- Overwrite into history
+end
+
+---@private
+local CudaProfGroup = vim.api.nvim_create_autocmd("CudaProf", {})
+
+---@private
+---@param bufnr number
+---@param keymaps fun(bufnr: integer): nil?
+function M.setup_autocmds_and_keymaps(bufnr, keymaps)
+    local curr_file = vim.api.nvim_buf_get_name(0)
+    local cmd = string.format(
+        "autocmd Filetype cuda-prof "
+            .. "let path = '%s' | call clearmatches() | "
+            -- move the cursor to the line containing the current filename
+            .. "call search('\\V'.path.'\\$') | "
+            -- add a hl group to that line
+            .. "call matchadd('HarpoonCurrentFile', '\\V'.path.'\\$')",
+        curr_file:gsub("\\", "\\\\")
+    )
+    vim.cmd(cmd)
+
+    if vim.api.nvim_buf_get_name(bufnr) == "" then
+        vim.api.nvim_buf_set_name(bufnr, "CudaProfilerSession")
     end
 
-    broker.setup_autocmds_and_keymaps(bufnr, opts)
-
-    self.win_id = win_id
-    vim.api.nvim_set_option_value("number", true, {
-        win = win_id,
+    vim.api.nvim_set_option_value("filetype", "cuda-prof", {
+        buf = bufnr,
     })
 
-    return win_id, bufnr
-end
+    vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
 
----@param list? HarpoonList
----TODO: @param opts? CudaProfWindowConfig
-function M:toggle_quick_menu(list, opts)
-    opts = opts or {}
-    local current_file = vim.api.nvim_buf_get_name(0)
-    local win_id, bufnr = self:_create_window(opts)
-
-    self.win_id = win_id
-    self.bufnr = bufnr
-
-    vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, list)
-end
-
-function M:_get_processed_ui_contents()
-    local list = broker.get_contents(self.bufnr)
-    local length = #list
-    return list, length
-end
-
-function M:save()
-    local list, length = self:_get_processed_ui_contents()
-
-    Logger:log("ui#save", list)
-    self.active_list:resolve_displayed(list, length)
-    if self.config.sync_on_ui_close then
-        require("harpoon"):sync()
+    --- Define the keymap function
+    if keymaps ~= nil then
+        keymaps(bufnr)
     end
-end
 
----@param config CudaProfWindowConfig
-function M:configure(config)
-    self.config = config
+    --- CHANGE ALL OF THIS
+    --- Define other autocmds
+    vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
+        group = CudaProfGroup,
+        buffer = bufnr,
+        callback = function()
+            local config = require("cuda-prof").config
+            require("cuda-prof.sessions.ui").save()
+        end,
+    })
+
+    vim.api.nvim_create_autocmd({ "BufLeave" }, {
+        group = CudaProfGroup,
+        buffer = bufnr,
+        callback = function()
+            -- Content checking and possible warning, maybe ignore not valid filepath on trigger with warning (on close)
+            require("cuda-prof.sessions").ui:save()
+        end,
+    })
 end
 
 return M

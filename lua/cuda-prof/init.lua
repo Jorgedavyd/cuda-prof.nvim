@@ -1,7 +1,29 @@
 local utils = require("cuda-prof.utils")
 
----@class CudaProfConfig
+---@class CudaProf
+---@field config CudaProfConfig
+---@field setup fun(opts: CudaProfConfig):nil
 local M = {}
+
+---@class CudaProfConfig
+---@field session CudaProfSessionConfig
+---@field extensions CudaProfExtensionConfig
+
+---@class CudaProfExtensionConfig
+---@field telescope table
+---@field sqlite table
+
+---@class CudaProfSessionConfig
+---@field window CudaProfWindowConfig
+---@field keymaps fun(bufnr: integer): nil
+
+---@class CudaProfWindowConfig
+---@field border? any this value is directly passed to nvim_open_win
+---@field title_pos? any this value is directly passed to nvim_open_win
+---@field title? string this value is directly passed to nvim_open_win
+---@field height_in_lines? number this value is directly passed to nvim_open_win
+---@field width_in_columns? number this value is directly passed to nvim_open_win
+---@field style? string this value is directly passed to nvim_open_win
 
 setmetatable(M, {
     ---Eithers return the default configuration or an invalid functionality.
@@ -10,8 +32,9 @@ setmetatable(M, {
     __index = function (_, k)
         if k=="config" then
             return {
+                ---@type CudaProfSessionConfig
                 session = {
-                    ---@class CudaSessionWindowConfig
+                    ---@type CudaProfWindowConfig
                     window = {
                         title = "Cuda Profiler",
                         title_pos = "left",
@@ -25,6 +48,7 @@ setmetatable(M, {
                         utils.LogNotImplemented("Session Keymaps")
                     end
                 },
+                ---@type CudaProfExtensionConfig
                 extensions = {
                     telescope = {},
                     sqlite = {}
