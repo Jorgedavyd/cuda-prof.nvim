@@ -105,7 +105,7 @@ function M:save()
     if self.config.sync_on_ui_close then
         require("harpoon"):sync()
     end
-vpend
+end
 
 ---@param config CudaProfWindowConfig
 function M:configure(config)

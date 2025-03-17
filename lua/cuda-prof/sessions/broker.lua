@@ -78,6 +78,7 @@ function M.setup_autocmds_and_keymaps(bufnr, opts)
         group = CudaProfGroup,
         buffer = bufnr,
         callback = function()
+            -- Content checking and possible warning, maybe ignore not valid filepath on trigger with warning
             require("cuda-prof").ui:toggle_quick_menu()
         end,
     })
