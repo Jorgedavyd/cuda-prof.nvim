@@ -3,6 +3,7 @@ local utils = require("cuda-prof.utils")
 ---@class CudaProf
 ---@field config CudaProfConfig
 ---@field setup fun(opts: CudaProfConfig):nil
+---@field status boolean
 local M = {}
 
 ---@class CudaProfConfig
@@ -61,10 +62,48 @@ setmetatable(M, {
     end
 })
 
+M.status = false
+
 function M.setup(opts)
     opts = opts or {}
     M.config = vim.tbl_deep_extend('keep', opts, M.config)
 end
+
+function M.activate()
+    M.status = true
+    require("cuda-prof.sessions.ui").import(M.config.session)
+end
+
+function M.deactivate()
+    M.status = false
+    require("cuda-prof.sessions.ui").save()
+end
+
+function M.toggle()
+    if M.status then
+        M.deactivate()
+        return
+    end
+    M.activate()
+end
+
+vim.api.nvim_create_user_command(
+    "CudaProfilerDeactivate",
+    "lua require('cuda-prof').deactivate()",
+    {}
+)
+
+vim.api.nvim_create_user_command(
+    "CudaProfilerActivate",
+    "lua require('cuda-prof').activate()",
+    {}
+)
+
+vim.api.nvim_create_user_command(
+    "CudaProfilerToggle",
+    "lua require('cuda-prof').toggle()",
+    {}
+)
 
 ---@class CudaProf
 return M

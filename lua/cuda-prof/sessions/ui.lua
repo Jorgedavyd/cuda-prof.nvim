@@ -12,6 +12,14 @@ local utils = require("cuda-prof.utils")
 ---@field save fun(): nil
 local M = {}
 
+--- Toggles the CudaProfUI
+---@param opts CudaProfWindowConfig
+---@return nil
+function M.toggle_quick_menu(opts)
+    M.open_menu(opts)
+    M.close_menu()
+end
+
 ---@private
 function M.close_menu()
     if not M.status then
@@ -73,76 +81,80 @@ function M.create_buffer(keymap)
     return bufnr
 end
 
---- Auto command that imports the history to a newly created buffer on VimEnter
+
+--- Auto command that imports the history to a newly created buffer on (VimEnter)
 ---@param opts CudaProfSessionConfig
 function M.import(opts)
     M.create_buffer(opts.keymaps)
-    --- feed with the history
-    --- check history of changes
-    --- Log information
+    local project_path = require("cuda-prof.io").manager.getProject()
+    local lines = {}
+    local ok, err = pcall(function ()
+        local file = io.open(project_path, "r")
+        if file then
+            for line in file:lines() do
+                table.insert(lines, line)
+            end
+            file:close()
+        end
+    end)
+
+    if not ok then
+        utils.LogError(err)
+        return
+    end
+    local filtered = M.check_lines(lines)
+    vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, filtered)
+end
+
+--- If the lines check sanity standards
+---@param contents [string]
+function M.check_lines(contents)
+    return vim.tbl_map(function (line)
+        if (vim.fn.filereadable(line)) and (vim.endswith(line, ".cu")) then
+            return line
+        end
+        local msg = string.format("%s is not a valid filepath", line)
+        utils.LogWarning(msg)
+    end, contents)
 end
 
 --- Implements saving into .cuda-prof_history (VimLeave)
 function M.save()
-    --- Get all lines from buffer
-    --- Check all lines from buffer
-    --- Filter all lines from buffer
-    --- Overwrite into history
+    local contents = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
+    local filtered = M.check_lines(contents)
+    local project_path = require("cuda-prof.io").manager.getProject()
+    local filepath = project_path .. "/.cuda-prof"
+    local ok, err = pcall(function ()
+        local file = io.open(filepath, "w")
+        if file then
+            for _, line in ipairs(filtered) do
+                file:write(line .. "\n")
+            end
+            file:close()
+        end
+    end)
+    if not ok then
+        local msg = string.format("Couldn't write to config file %s", filepath)
+        utils.LogError(msg .. err)
+        return
+    end
+    utils.LogInfo("Saved to " .. filepath)
 end
-
----@private
-local CudaProfGroup = vim.api.nvim_create_autocmd("CudaProf", {})
 
 ---@private
 ---@param bufnr number
 ---@param keymaps fun(bufnr: integer): nil?
 function M.setup_autocmds_and_keymaps(bufnr, keymaps)
-    local curr_file = vim.api.nvim_buf_get_name(0)
-    local cmd = string.format(
-        "autocmd Filetype cuda-prof "
-            .. "let path = '%s' | call clearmatches() | "
-            -- move the cursor to the line containing the current filename
-            .. "call search('\\V'.path.'\\$') | "
-            -- add a hl group to that line
-            .. "call matchadd('HarpoonCurrentFile', '\\V'.path.'\\$')",
-        curr_file:gsub("\\", "\\\\")
-    )
-    vim.cmd(cmd)
-
     if vim.api.nvim_buf_get_name(bufnr) == "" then
         vim.api.nvim_buf_set_name(bufnr, "CudaProfilerSession")
     end
-
     vim.api.nvim_set_option_value("filetype", "cuda-prof", {
         buf = bufnr,
     })
-
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
-
-    --- Define the keymap function
     if keymaps ~= nil then
         keymaps(bufnr)
     end
-
-    --- CHANGE ALL OF THIS
-    --- Define other autocmds
-    vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
-        group = CudaProfGroup,
-        buffer = bufnr,
-        callback = function()
-            local config = require("cuda-prof").config
-            require("cuda-prof.sessions.ui").save()
-        end,
-    })
-
-    vim.api.nvim_create_autocmd({ "BufLeave" }, {
-        group = CudaProfGroup,
-        buffer = bufnr,
-        callback = function()
-            -- Content checking and possible warning, maybe ignore not valid filepath on trigger with warning (on close)
-            require("cuda-prof.sessions").ui:save()
-        end,
-    })
 end
 
 return M
