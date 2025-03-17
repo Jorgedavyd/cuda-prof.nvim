@@ -1,4 +1,5 @@
 local utils = require("cuda-prof.utils")
+local config = require("cuda-prof.config").config
 
 ---@class CudaProfWrapper
 ---@field nvcc NvccWrapper
@@ -30,6 +31,10 @@ local utils = require("cuda-prof.utils")
 local M = {}
 
 local tools = {"nvcc", "ncu", "nvvp", "nsys"}
+
+if config.extensions.cli ~= nil then
+    vim.list_extend(tools, config.extensions.cli)
+end
 
 setmetatable(M,{
     __index = function (_, k_)

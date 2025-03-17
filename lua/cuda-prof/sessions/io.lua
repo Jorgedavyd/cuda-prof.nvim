@@ -1,5 +1,4 @@
 ---@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
----@field init fun(opts: table): nil
 ---@field getExperiments fun():[CudaProfExperiment] Gets a list of CudaProfExperiment objects from the CudaProfDirectory.
 ---@field getProjectPath fun():string Gets the project name for the current filepath. (Overwritten by user)
 ---@field setupProject fun(opts: table): nil Sets up the projects.
@@ -8,7 +7,6 @@
 ---@field gitOpts fun():nil Implements the git operations on project path for .gitignore and other.
 ---@field namingConvention fun(filepath: string):string Implements the file naming routine for every experiment on each file.
 ---@field autoNumeration fun():string Implements the autonumeration routine for sequential experiments.
----@field destructor fun():string Implements the destruction routine for the project manager.
 local M = {}
 
 ---@private Can just be created by CudaProfProjectManager object.
