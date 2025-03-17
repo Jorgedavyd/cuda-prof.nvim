@@ -26,7 +26,8 @@ function M.close_menu()
         return
     end
     if M.bufnr ~= nil and vim.api.nvim_buf_is_valid(M.bufnr) and M.win_id ~= nil and vim.api.nvim_win_is_valid(M.win_id) then
-        --- check if the contents are valid with the manager
+        local lines = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
+        local _ = M.check_lines(lines)
         vim.api.nvim_win_close(M.win_id, true)
     end
     M.win_id = nil

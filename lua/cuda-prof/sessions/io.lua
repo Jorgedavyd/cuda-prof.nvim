@@ -9,6 +9,7 @@
 ---@field namingConvention fun(filepath: string):string Implements the file naming routine for every experiment on each file.
 ---@field autoNumeration fun():string Implements the autonumeration routine for sequential experiments.
 ---@field destructor fun():string Implements the destruction routine for the project manager.
+local M = {}
 
 ---@private Can just be created by CudaProfProjectManager object.
 ---@class CudaProfExperiment
@@ -17,6 +18,7 @@
 ---@field getDatabase fun():string
 ---@field getDiagnosticSummary fun():string
 ---@field getAnalysisSummary fun():string
+local experiment = {}
 
 ---@private Inner object for creation manager routines.
 ---@class CudaProfDirectory
@@ -26,6 +28,7 @@
 ---@field directory string
 ---@field __call fun():string
 ---@field destructor fun():nil
+local directory = {}
 
 ---@private Inner object for creation manager routines.
 ---@class CudaProfFile
@@ -33,7 +36,6 @@
 ---@field filepath? string
 ---@field __call fun():string
 ---@field destructor fun():nil
-
-local M = {}
+local file = {}
 
 return M
