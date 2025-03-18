@@ -1,24 +1,20 @@
 local utils = require("cuda-prof.utils")
 
 ---@class CudaProfSequence
----@field routines [CudaProfRoutine]
----@field __call fun(self, filepath: CudaProfFile): nil
----@field call_set fun(self, filepaths: [CudaProfFile]): nil
+---@field routines [fun(filepath: string): nil]
+---@field new fun(self, routines: [fun(filepath: string): nil]):CudaProfSequence Instantiates a CudaProfSequence
+---@field __call fun(self, filepath: string): nil Calls routines in sequence
+---@field private call_set fun(self, filepaths: [string]): nil Calls a set as a sequence
 local S = {}
 
 S.__index = S
 
----Instantiates a CudaProfSequence
----@param routines [CudaProfSequence]
-function S.new(routines)
-    local self = {}
-    setmetatable(self, S)
+function S:new(routines)
+    setmetatable(S, self)
     self.routines = routines
+    return self
 end
 
----Calls routines in sequence
----@private
----@param filepath CudaProfFile
 function S:__call (filepath)
     if not S.routines then
         utils.LogError("Routines not defined on cuda-prof#run_sequence")
@@ -29,10 +25,6 @@ function S:__call (filepath)
     end
 end
 
-
----Calls routines in sequence
----@private
----@param filepaths [CudaProfFile]
 function S:call_set(filepaths)
     for _, filepath in ipairs(filepaths) do
         self(filepath)
