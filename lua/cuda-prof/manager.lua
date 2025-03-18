@@ -1,5 +1,5 @@
 local config = require("cuda-prof.config").config
-local uv = vim.loop or vim.uv
+local uv = vim.uv or vim.loop
 
 ---@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
 ---@field new fun(self):CudaProfProjectManager

@@ -21,7 +21,7 @@ function M.toggle_view()
     ui.toggle_quick_menu(config.session.window)
 end
 
-function M.def_trigger(opts)
+function M.define_trigger(opts)
     return triggers:new(opts)
 end
 
