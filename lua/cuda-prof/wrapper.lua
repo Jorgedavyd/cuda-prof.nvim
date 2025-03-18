@@ -13,7 +13,6 @@ local config = require("cuda-prof.config").config
 
 ---@class NvccWrapper
 ---@field __call fun(args: string):nil
----@field defaults {ui: fun(report: Report):nil; trace: fun(file: string):nil}
 
 ---@class NvidiaSystemsWrapper
 ---@field __call fun(args: string):nil

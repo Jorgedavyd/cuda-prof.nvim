@@ -2,10 +2,10 @@ local config = require("cuda-prof.config").config
 local uv = vim.loop or vim.uv
 
 ---@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
----@field new fun():CudaProfProjectManager
+---@field new fun(self):CudaProfProjectManager
 ---@field project_path string
----@field setup fun(opts: table): nil Sets up the projects.
----@field sequence_trigger fun(filepaths: [string]): nil Creates the IO accessibility for the sequence trigger.
+---@field setup fun(self, opts: table): nil Sets up the projects.
+---@field sequence_trigger fun(self, filepaths: [string]): nil Creates the IO accessibility for the sequence trigger.
 local M = {}
 M.__index = M
 

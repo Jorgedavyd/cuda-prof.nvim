@@ -17,6 +17,7 @@ local M = {}
 ---@class CudaProfSessionConfig
 ---@field window CudaProfWindowConfig
 ---@field keymaps fun(bufnr: integer): nil
+---@field resolve_triggers [string]
 
 ---@class CudaProfWindowConfig
 ---@field border? any this value is directly passed to nvim_open_win
@@ -42,7 +43,8 @@ M.opts = {
         keymaps = function (bufnr)
             _ = bufnr
             utils.LogNotImplemented("Session Keymaps")
-        end
+        end,
+        resolve_triggers = {}
     },
     ---@type CudaProfExtensionConfig
     extensions = {

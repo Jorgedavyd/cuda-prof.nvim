@@ -1,4 +1,5 @@
 local utils = require("cuda-prof.utils")
+local manager = require("cuda-prof.manager")
 
 ---@class CudaProfUI
 ---@field win_id number
@@ -123,8 +124,8 @@ end
 function M.save()
     local contents = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
     local filtered = M.check_lines(contents)
-    local project_path = require("cuda-prof.io").manager.getProject()
-    local filepath = project_path .. "/.cuda-prof"
+    local mng = manager:new()
+    local filepath = vim.fn.resolve(mng.project_path .. "/.cuda-prof/.config")
     local ok, err = pcall(function ()
         local file = io.open(filepath, "w")
         if file then

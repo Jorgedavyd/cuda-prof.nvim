@@ -4,22 +4,11 @@ local entry_display = require("telescope.pickers.entry_display")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local conf = require("telescope.config").values
-local harpoon = require("harpoon")
-
-local function filter_empty_string(list)
-    local next = {}
-    for idx = 1, #list do
-        if list[idx].value ~= "" then
-            table.insert(next, list[idx])
-        end
-    end
-
-    return next
-end
+local ui = require("cuda-prof.ui")
 
 local generate_new_finder = function()
     return finders.new_table({
-        results = filter_empty_string(harpoon:list().items),
+        results = vim.api.nvim_buf_get_lines(ui.bufnr, 0, -1, false),
         entry_maker = function(entry)
             local line = entry.value
                 .. ":"
@@ -64,7 +53,7 @@ local delete_harpoon_mark = function(prompt_bufnr)
     end
 
     local selection = action_state.get_selected_entry()
-    harpoon:list():remove(selection.value)
+    :list():remove(selection.value)
 
     local function get_selections()
         local results = {}
