@@ -82,7 +82,9 @@ end
 ---@param filepaths [string]
 ---@return string
 function M:resolveExperimentPath(filepaths)
-    local experiment_path = self:resolve_experiment_path()
+    local experiment_path = self:resolveExperimentsPaths(
+        vim.fn.resolve(self.project .. "/.cuda-prof/experiments")
+    )
     local experiment_name = self:resolveExperimentName(filepaths)
     return vim.fn.resolve(experiment_path .. experiment_name)
 end
