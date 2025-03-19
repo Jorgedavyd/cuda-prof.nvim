@@ -107,6 +107,7 @@ function M.save()
     local contents = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
     local filtered = M.mng:check_filepaths(contents)
     if filtered == nil then
+        utils.LogWarning("Couldn't find valid filepaths")
         return
     end
     local mng = manager:new()

@@ -18,17 +18,14 @@ local M = {}
 
 ---@class NvidiaSystemsWrapper
 ---@field __call fun(args: string):nil
----@field defaults {ui: fun(report: Report):nil; trace: fun(file: string):nil}
 
 ---@class NvidiaComputeWrapper
 ---@field __call fun(args: string):nil
----@field defaults {ui: fun(report: Report):nil; trace: fun(file: string):nil}
 
 ---@class NvidiaVisualProfilerWrapper
 ---@field __call fun(args: string):nil
----@field defaults {ui: fun(report: Report):nil; trace: fun(file: string):nil}
 
-M.tools = {"nvcc", "ncu", "nvvp", "nsys"}
+M.tools = {"nvcc", "ncu", "nvvp", "nsys", "nsys-ui", "ncu-ui"}
 
 if config.extensions.cli ~= nil then
     vim.list_extend(M.tools, config.extensions.cli)
