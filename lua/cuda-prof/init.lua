@@ -6,12 +6,13 @@ local M = {}
 
 ---@param opts? CudaProfConfig
 function M.setup(opts)
-  require("cuda-prof.config").setup(opts)
-  require("cuda-prof.user_cmds").setup()
+    require("cuda-prof.config").setup(opts)
+    require("cuda-prof.user_cmds").setup()
+    require("cuda-prof.triggers").setup()
 end
 
 return setmetatable(M, {
-  __index = function(_, k)
-    return require("cuda-prof.api")[k]
-  end,
+    __index = function(_, k)
+        return require("cuda-prof.api")[k]
+    end,
 })

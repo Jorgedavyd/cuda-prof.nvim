@@ -1,4 +1,3 @@
-local triggers = require("cuda-prof.triggers")
 local ui = require("cuda-prof.sessions.ui")
 local config = require("cuda-prof.config").config
 
@@ -7,8 +6,15 @@ local config = require("cuda-prof.config").config
 ---@class CudaProfAPI
 ---@field toggle_include fun():nil Includes the current buffer's filepath pointer
 ---@field toggle_view fun():nil Opens the interactive session
----@field def_trigger fun(opts: trigger_opts):nil Opens the interactive session
 local M = {}
+
+setmetatable(M,{
+    __index = function (_, k)
+        local triggers = require("cuda-prof.triggers")
+        local default = require("cuda-prof.triggers.default")
+        return triggers and triggers[k] or default[k]
+    end
+})
 
 function M.toggle_include()
     local filepath = vim.fn.getcwd()
@@ -19,10 +25,6 @@ end
 
 function M.toggle_view()
     ui.toggle_quick_menu(config.session.window)
-end
-
-function M.define_trigger(opts)
-    return triggers:new(opts)
 end
 
 return M

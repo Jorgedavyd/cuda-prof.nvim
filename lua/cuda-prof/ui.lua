@@ -1,46 +1,43 @@
 local utils = require("cuda-prof.utils")
+local config = require("cuda-prof.config").config
 local manager = require("cuda-prof.manager")
 
 ---@class CudaProfUI
 ---@field win_id number
----@field status boolean
 ---@field bufnr number
----@field config CudaProfWindowConfig
+---@field mng CudaProfProjectManager
 ---@field open_menu fun(opts: CudaProfWindowConfig): nil
 ---@field close_menu fun(): nil
 ---@field create_buffer fun(keymap: fun(bufnr: integer): nil): nil
 ---@field import fun(opts: CudaProfSessionConfig): nil
----@field save fun(): nil
+---@field save fun(): nil Implements saving into .cuda-prof_history (VimLeave)
+---@field toggle_quick_menu fun(opts: CudaProfWindowConfig):nil
+---@field private getWindowOpts fun(opts: CudaProfWindowConfig): vim.api.keyset.win_config
+---@field private create_buffer fun(keymap: (fun(bufnr: integer):nil)?):number
+---@field private setup_autocmds_and_keymaps fun(bufnr: integer, keymaps: (fun(bufnr: integer): nil)?):nil
 local M = {}
 
---- Toggles the CudaProfUI
----@param opts CudaProfWindowConfig
----@return nil
 function M.toggle_quick_menu(opts)
     M.open_menu(opts)
     M.close_menu()
 end
 
----@private
 function M.close_menu()
-    if not M.status then
+    if not _G.status then
         return
     end
     if M.bufnr ~= nil and vim.api.nvim_buf_is_valid(M.bufnr) and M.win_id ~= nil and vim.api.nvim_win_is_valid(M.win_id) then
         local lines = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
-        local _ = M.check_lines(lines)
+        local _ = M.mng:check_filepaths(lines)
         vim.api.nvim_win_close(M.win_id, true)
     end
     M.win_id = nil
-    M.status = false
+    _G.status = false
 end
 
---- Opens the interactive session
----@private
----@param opts CudaProfWindowConfig
----@return nil
-function M.open_menu(opts)
-    if M.status then
+function M.open_menu()
+    local opts = config.session.window
+    if _G.status then
         return
     end
     local win_id
@@ -56,9 +53,6 @@ function M.open_menu(opts)
     })
 end
 
----@private
----@param opts CudaProfWindowConfig
----@return CudaProfWindowConfig
 function M.getWindowOpts(opts)
     local width = opts.width_in_columns
     local height = opts.height_in_lines or 8
@@ -74,24 +68,21 @@ function M.getWindowOpts(opts)
     return opts
 end
 
----@private
----@param keymap fun(bufnr: integer): nil?
----@return number
 function M.create_buffer(keymap)
+    if keymap == nil then
+        return
+    end
     local bufnr = vim.api.nvim_create_buf(false, true)
     M.setup_autocmds_and_keymaps(bufnr, keymap)
     return bufnr
 end
 
 
---- Auto command that imports the history to a newly created buffer on (VimEnter)
----@param opts CudaProfSessionConfig
-function M.import(opts)
-    M.create_buffer(opts.keymaps)
-    local project_path = require("cuda-prof.io").manager.getProject()
+function M.import()
+    M.create_buffer(config.session.keymaps)
     local lines = {}
     local ok, err = pcall(function ()
-        local file = io.open(project_path, "r")
+        local file = io.open(M.mng.project_path, "r")
         if file then
             for line in file:lines() do
                 table.insert(lines, line)
@@ -104,26 +95,20 @@ function M.import(opts)
         utils.LogError(err)
         return
     end
-    local filtered = M.check_lines(lines)
+    local filtered = M.mng:check_filepaths(lines)
+    if filtered == nil then
+        utils.LogWarning("Couldn't find valid Cuda files in session")
+        return
+    end
     vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, filtered)
 end
 
---- If the lines check sanity standards
----@param contents [string]
-function M.check_lines(contents)
-    return vim.tbl_map(function (line)
-        if (vim.fn.filereadable(line)) and (vim.endswith(line, ".cu")) then
-            return line
-        end
-        local msg = string.format("%s is not a valid filepath", line)
-        utils.LogWarning(msg)
-    end, contents)
-end
-
---- Implements saving into .cuda-prof_history (VimLeave)
 function M.save()
     local contents = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
-    local filtered = M.check_lines(contents)
+    local filtered = M.mng:check_filepaths(contents)
+    if filtered == nil then
+        return
+    end
     local mng = manager:new()
     local filepath = vim.fn.resolve(mng.project_path .. "/.cuda-prof/.config")
     local ok, err = pcall(function ()
@@ -143,9 +128,6 @@ function M.save()
     utils.LogInfo("Saved to " .. filepath)
 end
 
----@private
----@param bufnr number
----@param keymaps fun(bufnr: integer): nil?
 function M.setup_autocmds_and_keymaps(bufnr, keymaps)
     if vim.api.nvim_buf_get_name(bufnr) == "" then
         vim.api.nvim_buf_set_name(bufnr, "CudaProfilerSession")

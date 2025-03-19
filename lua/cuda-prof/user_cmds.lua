@@ -1,5 +1,6 @@
 local ui = require("cuda-prof.sessions.ui")
 local config = require("cuda-prof.config").config
+local wrappers = require("cuda-prof.wrapper")
 
 ---@class CudaProfManager
 ---@field activate fun():nil
@@ -45,6 +46,16 @@ function M.setup()
         "lua require('cuda-prof').toggle()",
         {}
     )
+
+    for _, cmd in ipairs(wrappers.tools) do
+        local user_cmd = cmd:gsub("^%l", string.upper)
+        vim.api.nvim_create_user_command(
+            user_cmd,
+            string.format("lua require('cuda-prof.wrappers')[%s]", cmd),
+            {}
+        )
+    end
+
 end
 
 return M

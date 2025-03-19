@@ -2,10 +2,12 @@ local utils = require("cuda-prof.utils")
 local config = require("cuda-prof.config").config
 
 ---@class CudaProfWrapper
+---@field M.tools [string] Defined for extensibility
 ---@field nvcc NvccWrapper
 ---@field nsys NvidiaSystemsWrapper
 ---@field ncu NvidiaComputeWrapper
 ---@field nvvp NvidiaVisualProfilerWrapper
+local M = {}
 
 ---@class Report
 ---@field path string
@@ -26,18 +28,15 @@ local config = require("cuda-prof.config").config
 ---@field __call fun(args: string):nil
 ---@field defaults {ui: fun(report: Report):nil; trace: fun(file: string):nil}
 
----@type CudaProfWrapper
-local M = {}
-
-local tools = {"nvcc", "ncu", "nvvp", "nsys"}
+M.tools = {"nvcc", "ncu", "nvvp", "nsys"}
 
 if config.extensions.cli ~= nil then
-    vim.list_extend(tools, config.extensions.cli)
+    vim.list_extend(M.tools, config.extensions.cli)
 end
 
 setmetatable(M,{
     __index = function (_, k_)
-        if vim.list_contains(tools, k_) then
+        if vim.list_contains(M.tools, k_) then
             local M_ = {}
             setmetatable(M_, {
                 __index = function (_, k)

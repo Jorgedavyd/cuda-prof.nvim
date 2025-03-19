@@ -1,4 +1,5 @@
 local config = require("cuda-prof.config").config
+local utils = require("cuda-prof.utils")
 local uv = vim.uv or vim.loop
 
 ---@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
@@ -6,6 +7,7 @@ local uv = vim.uv or vim.loop
 ---@field project_path string
 ---@field setup fun(self, opts: table): nil Sets up the projects.
 ---@field sequence_trigger fun(self, filepaths: [string]): nil Creates the IO accessibility for the sequence trigger.
+---@field check_filepaths fun(self, filepaths: [string]): nil If the lines check sanity standards
 local M = {}
 M.__index = M
 
@@ -16,11 +18,20 @@ function M:new()
     }
     setmetatable(cuda_prof, self)
     self.project_path = self:resolve_project_path()
-    return cuda_prof
+    return self
 end
 
----@param filepaths [string]
----@return nil
+function M:check_filepaths(filepaths)
+    return vim.tbl_map(function (line)
+        if (vim.fn.filereadable(line)) and (vim.endswith(line, ".cu")) then
+            return line
+        end
+        local msg = string.format("%s is not a valid filepath", line)
+        utils.LogWarning(msg)
+    end, filepaths)
+end
+
+
 function M:sequence_trigger(filepaths)
     local resolved_name = self:resolveExperimentName(filepaths)
     local hyp_dir = vim.fn.resolve(self:resolveExperimentsPaths(vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim") .. resolved_name)
@@ -33,7 +44,6 @@ function M:sequence_trigger(filepaths)
     uv.fs_mkdir(new_report)
 end
 
----@private
 ---@return string
 function M:resolve_project_path()
     local current_dir = vim.fn.getcwd()
@@ -56,7 +66,6 @@ function M:resolve_project_path()
     return resolved_project
 end
 
----@private
 ---@param resolved_filepaths [string]
 ---@return string
 function M:resolveExperimentName(resolved_filepaths)
@@ -65,20 +74,17 @@ function M:resolveExperimentName(resolved_filepaths)
     return table.concat(names, "_")
 end
 
----@private
 ---@param cudaProfPath string
 ---@return string
 function M:resolveExperimentsPaths(cudaProfPath)
     return vim.fn.resolve(cudaProfPath .. "/experiments")
 end
 
----@private
 ---@return string
 function M:resolveCudaProfPath()
     return vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
 end
 
----@private
 ---@param filepaths [string]
 ---@return string
 function M:resolveExperimentPath(filepaths)
@@ -89,7 +95,6 @@ function M:resolveExperimentPath(filepaths)
     return vim.fn.resolve(experiment_path .. experiment_name)
 end
 
----@private
 ---@param filepaths [string]
 ---@return string
 function M:resolveExperimentHistoryPath(filepaths)
