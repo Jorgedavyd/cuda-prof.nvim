@@ -1,8 +1,8 @@
 <div align="center">
 
 # nsight.nvim
-###### A NVIDIA CUDA Profiling Tools wrapper for Neovim.
-<img height="480" src="/assets/cuda-prof-logo.png" />
+###### NVIDIA Nsight Integrated tools for Neovim.
+<img height="480" src="/assets/nsight-logo.png" />
 
 [![Neovim](https://img.shields.io/badge/Neovim-blue.svg?style=for-the-badge&logo=neovim)](https://neovim.io)
 [![CUDA](https://img.shields.io/badge/CUDA-green.svg?style=for-the-badge&logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
@@ -12,7 +12,7 @@
 
 ## Overview
 
-`cuda-prof.nvim` is a Neovim plugin that provides seamless integration with NVIDIA CUDA profiling tools. It allows you to manage CUDA profiling sessions, run various NVIDIA tools, and analyze profiling results without leaving your editor.
+`nsight.nvim` is a Neovim plugin that provides seamless integration with NVIDIA Nsight profiling tools. It allows you to manage CUDA profiling sessions, run various NVIDIA tools, and analyze profiling results without leaving your editor.
 
 ## Requirements
 
@@ -29,9 +29,9 @@
 
 ```lua
 {
-    "Jorgedavyd/cuda-prof.nvim",
+    "Jorgedavyd/nsight.nvim",
     config = function()
-        require("cuda-prof").setup({
+        require("nsight").setup({
             -- Your configuration here
         })
     end,
@@ -42,9 +42,9 @@
 
 ```lua
 use {
-    "Jorgedavyd/cuda-prof.nvim",
+    "Jorgedavyd/nsight.nvim",
     config = function()
-        require("cuda-prof").setup({
+        require("nsight").setup({
             -- Your configuration here
         })
     end
@@ -54,19 +54,19 @@ use {
 ### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'Jorgedavyd/cuda-prof.nvim'
+Plug 'Jorgedavyd/nsight.nvim'
 
 " After installation, in your init.lua:
-" lua require('cuda-prof').setup({})
+" lua require('nsight').setup({})
 ```
 
 ### Using [dein.vim](https://github.com/Shougo/dein.vim)
 
 ```vim
-call dein#add('Jorgedavyd/cuda-prof.nvim')
+call dein#add('Jorgedavyd/nsight.nvim')
 
 " After installation, in your init.lua:
-" lua require('cuda-prof').setup({})
+" lua require('nsight').setup({})
 ```
 
 ## Configuration
@@ -74,10 +74,10 @@ call dein#add('Jorgedavyd/cuda-prof.nvim')
 ### Default Configuration
 
 ```lua
-require("cuda-prof").setup({
+require("nsight").setup({
     session = {
         window = {
-            title = "Cuda Profiler",
+            title = "Nsight Session",
             title_pos = "left",
             width_in_columns = 12,
             height_in_lines = 8,
@@ -111,9 +111,9 @@ require("cuda-prof").setup({
 
 | Command | Description |
 |---------|-------------|
-| `CudaProfilerActivate` | Activate the profiling session |
-| `CudaProfilerDeactivate` | Deactivate the profiling session |
-| `CudaProfilerToggle` | Toggle the profiling session |
+| `NsightActivate` | Activate the profiling session |
+| `NsightDeactivate` | Deactivate the profiling session |
+| `NsightToggle` | Toggle the profiling session |
 | `Nvcc` | Run NVIDIA CUDA Compiler |
 | `Ncu` | Run NVIDIA Nsight Compute |
 | `Nvvp` | Run NVIDIA Visual Profiler |
@@ -134,22 +134,22 @@ The plugin integrates with Telescope for enhanced file selection and report brow
 
 ```lua
 -- Add to your telescope configuration
-telescope.load_extension('cuda-prof')
+telescope.load_extension('nsight')
 
 -- Usage
-:Telescope cuda-prof file_add_cuda    -- Find and add CUDA files to session
-:Telescope cuda-prof nsys_open_report -- Open Nsight Systems reports
-:Telescope cuda-prof ncu_open_report  -- Open Nsight Compute reports
+:Telescope nsight file_add_cuda    -- Find and add CUDA files to session
+:Telescope nsight nsys_open_report -- Open Nsight Systems reports
+:Telescope nsight ncu_open_report  -- Open Nsight Compute reports
 ```
 
 ## Project Structure
 
-`cuda-prof.nvim` creates a `.cuda-prof.nvim` directory in your project root to store profiling experiments and configurations. Experiments are organized based on the files being profiled.
+`nsight.nvim` creates a `.nsight.nvim` directory in your project root to store profiling experiments and configurations. Experiments are organized based on the files being profiled.
 
 ### Experiment Structure
 
 ```
-.cuda-prof.nvim/
+.nsight.nvim/
 ├── .config                    # Session configuration
 └── experiments/
     └── file1_file2/           # Experiment for specific files
@@ -164,30 +164,30 @@ telescope.load_extension('cuda-prof')
 
 ```lua
 -- In your init.lua
-require("cuda-prof").setup()
+require("nsight").setup()
 
 -- In Neovim
-:CudaProfilerToggle           -- Open the profiler window
+:NsightToggle           -- Open the profiler window
 -- Add CUDA files to the session
-:CudaProfilerDeactivate       -- Save the session
+:NsightDeactivate       -- Save the session
 :Nvcc -o output main.cu       -- Compile a CUDA file
 :Nsys profile ./output        -- Profile the compiled binary
-:Telescope cuda-prof nsys_open_report -- View the report
+:Telescope nsight nsys_open_report -- View the report
 ```
 
 ### Custom Keymaps
 
 ```lua
-require("cuda-prof").setup({
+require("nsight").setup({
     session = {
         keymaps = function(bufnr)
             -- Define keymaps for the profiler buffer
             vim.api.nvim_buf_set_keymap(bufnr, 'n', '<CR>',
-                "<cmd>lua require('cuda-prof').toggle_include()<CR>",
+                "<cmd>lua require('nsight').toggle_include()<CR>",
                 { noremap = true, silent = true })
 
             vim.api.nvim_buf_set_keymap(bufnr, 'n', 'q',
-                "<cmd>lua require('cuda-prof.ui').close_menu()<CR>",
+                "<cmd>lua require('nsight.ui').close_menu()<CR>",
                 { noremap = true, silent = true })
         end
     }

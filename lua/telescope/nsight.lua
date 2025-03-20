@@ -1,4 +1,4 @@
-local ui = require("cuda-prof.ui")
+local ui = require("nsight.ui")
 local telescope = require("telescope")
 local pickers = require('telescope.pickers')
 local finders = require('telescope.finders')
@@ -68,7 +68,7 @@ end
 M.cuda_prof_open_report = function(title, cmd, opts)
     assert(vim.endswith(cmd, "ui"), "Not a valid cmd")
     opts = opts or {}
-    local wrapper = require("cuda-prof.wrapper")
+    local wrapper = require("nsight.wrapper")
     assert(wrapper[cmd], "No wrapper function for " .. cmd)
     pickers.new(opts, {
         prompt_title = title,

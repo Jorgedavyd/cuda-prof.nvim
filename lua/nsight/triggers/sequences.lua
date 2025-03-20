@@ -1,8 +1,8 @@
-local utils = require("cuda-prof.utils")
+local utils = require("nsight.utils")
 
----@class CudaProfSequence
+---@class NsightSequence
 ---@field routines [fun(filepath: string): nil]
----@field new fun(self, routines: [fun(filepath: string): nil]):CudaProfSequence Instantiates a CudaProfSequence
+---@field new fun(self, routines: [fun(filepath: string): nil]):NsightSequence Instantiates a CudaProfSequence
 ---@field __call fun(self, filepath: string): nil Calls routines in sequence
 ---@field private call_set fun(self, filepaths: [string]): nil Calls a set as a sequence
 local S = {}

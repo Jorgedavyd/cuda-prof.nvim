@@ -1,10 +1,10 @@
-local manager = require("cuda-prof.manager")
-local utils = require("cuda-prof.utils")
+local manager = require("nsight.manager")
+local utils = require("nsight.utils")
 
----@class CudaProfTriggers
----@field mainSequence? CudaProfSequence Basically is the main CudaProfSequence object that has to be ran.
----@field mng CudaProfProjectManager IO operator.
----@field new fun(self, mainSequence: CudaProfSequence):nil
+---@class NsightTriggers
+---@field mainSequence? NsightSequence Basically is the main CudaProfSequence object that has to be ran.
+---@field mng NsightProjectManager IO operator.
+---@field new fun(self, mainSequence: NsightSequence):nil
 ---@field preSequence fun(self, opts: table):nil Prepared launching the mainSequence.
 ---@field postSequence fun(self, opts: table):nil
 ---@field __call fun(self, opts: table):nil

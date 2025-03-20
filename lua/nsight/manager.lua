@@ -1,8 +1,8 @@
-local config = require("cuda-prof.config").opts
-local utils = require("cuda-prof.utils")
+local config = require("nsight.config").opts
+local utils = require("nsight.utils")
 
----@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
----@field new fun(self):CudaProfProjectManager
+---@class NsightProjectManager Basically manages all IO operations and setting up experiments.
+---@field new fun(self):NsightProjectManager
 ---@field project_path string
 ---@field setup fun(self, opts: table): nil Sets up the projects.
 ---@field sequence_trigger fun(self, filepaths: [string]): nil Creates the IO accessibility for the sequence trigger.
@@ -128,7 +128,7 @@ function M:setup()
     if vim.fn.filereadable(config_path) ~= 1 then
         local file = io.open(config_path, "w")
         if file then
-            file:write("# CUDA Profiler configuration\n")
+            file:write("# nsight.nvim configuration\n")
             file:close()
         end
     end

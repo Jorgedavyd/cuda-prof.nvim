@@ -1,10 +1,10 @@
-local group = require("cuda-prof.augroup")
-local wrappers = require("cuda-prof.wrapper")
-local config = require("cuda-prof.config").opts
-local ui = require("cuda-prof.ui")
-local utils = require("cuda-prof.utils")
+local group = require("nsight.augroup")
+local wrappers = require("nsight.wrapper")
+local config = require("nsight.config").opts
+local ui = require("nsight.ui")
+local utils = require("nsight.utils")
 
----@class CudaProfNvimWrapper
+---@class NsightNeovimWrapper
 ---@field private activate fun():nil
 ---@field private deactivate fun():nil
 ---@field private toggle fun():nil
@@ -13,7 +13,7 @@ local M = {}
 
 function M.activate()
     if _G.status then
-        utils.LogInfo("The Cuda Profiler is active already")
+        utils.LogInfo("Nsight is active already")
         return
     end
     _G.status = true
@@ -22,7 +22,7 @@ end
 
 function M.deactivate()
     if not _G.status then
-        utils.LogInfo("The Cuda Profiler was deactivated already")
+        utils.LogInfo("Nsight was deactivated already")
         return
     end
     _G.status = false
@@ -55,22 +55,22 @@ function M.setup()
         callback = function (event)
             vim.api.nvim_buf_create_user_command(
                 event.buf,
-                "CudaProfilerDeactivate",
-                "lua require('cuda-prof').deactivate()",
+                "NsightDeactivate",
+                "lua require('nsight').deactivate()",
                 {}
             )
 
             vim.api.nvim_buf_create_user_command(
                 event.buf,
-                "CudaProfilerActivate",
-                "lua require('cuda-prof').activate()",
+                "NsightActivate",
+                "lua require('nsight').activate()",
                 {}
             )
 
             vim.api.nvim_buf_create_user_command(
                 event.buf,
-                "CudaProfilerToggle",
-                "lua require('cuda-prof').toggle()",
+                "NsightToggle",
+                "lua require('nsight').toggle()",
                 {}
             )
 
@@ -78,7 +78,7 @@ function M.setup()
                 local user_cmd = transform_cmd_to_regex(cmd)
                 vim.api.nvim_create_user_command(
                     user_cmd,
-                    string.format("lua require('cuda-prof.wrappers')[%s]", cmd),
+                    string.format("lua require('nsight.wrappers')[%s]", cmd),
                     {}
                 )
             end

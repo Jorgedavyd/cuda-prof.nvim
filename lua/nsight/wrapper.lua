@@ -1,5 +1,5 @@
-local utils = require("cuda-prof.utils")
-local config = require("cuda-prof.config").opts
+local utils = require("nsight.utils")
+local config = require("nsight.config").opts
 
 ---@private
 ---@class NsightToolWrapper
@@ -85,6 +85,5 @@ function M.setup()
         return wrap(args)
     end
 end
-
 
 return M

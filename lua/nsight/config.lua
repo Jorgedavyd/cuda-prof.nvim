@@ -1,22 +1,22 @@
----@class CudaProfConfigManager
----@field opts CudaProfConfig
----@field setup fun(opts: CudaProfConfig?): nil
+---@class NsightConfigManager
+---@field opts NsightConfig
+---@field setup fun(opts: NsightConfig?): nil
 local M = {}
 
----@class CudaProfConfig
----@field session CudaProfSessionConfig
----@field extensions CudaProfExtensionConfig
+---@class NsightConfig
+---@field session NsightSessionConfig
+---@field extensions NsightExtensionConfig
 ---@field keymaps fun(buf): nil Configure the keymaps on CUDA file attachement.
 
----@class CudaProfExtensionConfig
+---@class NsightExtensionConfig
 ---@field cli [string]
 
----@class CudaProfSessionConfig
----@field window CudaProfWindowConfig
+---@class NsightSessionConfig
+---@field window NsightWindowConfig
 ---@field keymaps fun(bufnr: integer): nil
 ---@field resolve_triggers [string]
 
----@class CudaProfWindowConfig
+---@class NsightWindowConfig
 ---@field border? any this value is directly passed to nvim_open_win
 ---@field title_pos? any this value is directly passed to nvim_open_win
 ---@field title? string this value is directly passed to nvim_open_win
@@ -27,7 +27,7 @@ local M = {}
 M.opts = {
     session = {
         window = {
-            title = "Cuda Profiler",
+            title = "Nsight Session",
             title_pos = "left",
             width_in_columns = 12,
             height_in_lines = 8,

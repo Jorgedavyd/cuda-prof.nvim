@@ -1,18 +1,18 @@
-local utils = require("cuda-prof.utils")
-local config = require("cuda-prof.config").opts
-local manager = require("cuda-prof.manager")
+local utils = require("nsight.utils")
+local config = require("nsight.config").opts
+local manager = require("nsight.manager")
 
----@class CudaProfUI
+---@class NsightUI
 ---@field win_id number
 ---@field bufnr number
----@field mng CudaProfProjectManager
----@field open_menu fun(opts: CudaProfWindowConfig): nil
+---@field mng NsightProjectManager
+---@field open_menu fun(opts: NsightWindowConfig): nil
 ---@field close_menu fun(): nil
 ---@field create_buffer fun(keymap: fun(bufnr: integer): nil): nil
 ---@field import fun(): nil
 ---@field save fun(): nil Implements saving into .cuda-prof_history (VimLeave)
----@field toggle_quick_menu fun(opts: CudaProfWindowConfig):nil
----@field private getWindowOpts fun(opts: CudaProfWindowConfig): vim.api.keyset.win_config
+---@field toggle_quick_menu fun(opts: NsightWindowConfig):nil
+---@field private getWindowOpts fun(opts: NsightWindowConfig): vim.api.keyset.win_config
 ---@field private create_buffer fun(keymap: (fun(bufnr: integer):nil)?):number
 ---@field private setup_autocmds_and_keymaps fun(bufnr: integer):nil
 local M = {}
@@ -128,9 +128,9 @@ end
 
 function M.setup_autocmds_and_keymaps(bufnr)
     if vim.api.nvim_buf_get_name(bufnr) == "" then
-        vim.api.nvim_buf_set_name(bufnr, "CudaProfilerSession")
+        vim.api.nvim_buf_set_name(bufnr, "NsightSession")
     end
-    vim.api.nvim_set_option_value("filetype", "cuda-prof", {
+    vim.api.nvim_set_option_value("filetype", "nsight", {
         buf = bufnr,
     })
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })

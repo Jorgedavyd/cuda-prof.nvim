@@ -1,9 +1,9 @@
-local ui = require("cuda-prof.sessions.ui")
-local config = require("cuda-prof.config").opts
+local ui = require("nsight.sessions.ui")
+local config = require("nsight.config").opts
 
 ---@alias trigger_opts [fun(filepath: string): nil]
 
----@class CudaProfAPI
+---@class NsightAPI
 ---@field toggle_include fun():nil Includes the current buffer's filepath pointer
 ---@field toggle_view fun():nil Opens the interactive session
 local M = {}
