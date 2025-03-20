@@ -4,10 +4,13 @@
 ---@field status boolean
 local M = {}
 
+_G.status = false
+
 ---@param opts? CudaProfConfig
 function M.setup(opts)
     require("cuda-prof.config").setup(opts)
-    require("cuda-prof.user_cmds").setup()
+    require("cuda-prof").setup()
+    require("cuda-prof.autocmd").setup()
     require("cuda-prof.triggers").setup()
 end
 

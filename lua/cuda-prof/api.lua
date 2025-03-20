@@ -1,5 +1,5 @@
 local ui = require("cuda-prof.sessions.ui")
-local config = require("cuda-prof.config").config
+local config = require("cuda-prof.config").opts
 
 ---@alias trigger_opts [fun(filepath: string): nil]
 

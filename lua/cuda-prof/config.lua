@@ -1,17 +1,14 @@
-local utils = require("cuda-prof.utils")
-
 ---@class CudaProfConfigManager
 ---@field opts CudaProfConfig
----@field setup fun(CudaProfConfig): nil
+---@field setup fun(opts: CudaProfConfig?): nil
 local M = {}
 
 ---@class CudaProfConfig
 ---@field session CudaProfSessionConfig
 ---@field extensions CudaProfExtensionConfig
+---@field keymaps fun(buf): nil Configure the keymaps on CUDA file attachement.
 
 ---@class CudaProfExtensionConfig
----@field telescope table
----@field sqlite table
 ---@field cli [string]
 
 ---@class CudaProfSessionConfig
@@ -27,11 +24,8 @@ local M = {}
 ---@field width_in_columns? number this value is directly passed to nvim_open_win
 ---@field style? string this value is directly passed to nvim_open_win
 
----@type CudaProfConfig
 M.opts = {
-    ---@type CudaProfSessionConfig
     session = {
-        ---@type CudaProfWindowConfig
         window = {
             title = "Cuda Profiler",
             title_pos = "left",
@@ -41,24 +35,21 @@ M.opts = {
             border = "single"
         },
         keymaps = function (bufnr)
-            _ = bufnr
-            utils.LogNotImplemented("Session Keymaps")
+            vim.keymap.set("n", "<leader>cu", "echo Hola", {buffer = bufnr})
         end,
         resolve_triggers = {}
     },
-    ---@type CudaProfExtensionConfig
     extensions = {
-        telescope = {},
-        sqlite = {},
         cli = {}
-    }
+    },
+    keymaps = function (bufnr)
+        vim.keymap.set("n", "<leader>cu", "echo Hola", {buffer = bufnr})
+    end
 }
 
----Merges default params with user defines params
----@param opts CudaProfConfig
 function M.setup(opts)
     opts = opts or {}
-    M.config = vim.tbl_deep_extend('keep', opts, M.opts)
+    M.opts = vim.tbl_deep_extend('keep', opts, M.opts)
 end
 
 return M

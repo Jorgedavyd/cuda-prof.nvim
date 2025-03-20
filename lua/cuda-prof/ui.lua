@@ -1,5 +1,5 @@
 local utils = require("cuda-prof.utils")
-local config = require("cuda-prof.config").config
+local config = require("cuda-prof.config").opts
 local manager = require("cuda-prof.manager")
 
 ---@class CudaProfUI
@@ -9,12 +9,12 @@ local manager = require("cuda-prof.manager")
 ---@field open_menu fun(opts: CudaProfWindowConfig): nil
 ---@field close_menu fun(): nil
 ---@field create_buffer fun(keymap: fun(bufnr: integer): nil): nil
----@field import fun(opts: CudaProfSessionConfig): nil
+---@field import fun(): nil
 ---@field save fun(): nil Implements saving into .cuda-prof_history (VimLeave)
 ---@field toggle_quick_menu fun(opts: CudaProfWindowConfig):nil
 ---@field private getWindowOpts fun(opts: CudaProfWindowConfig): vim.api.keyset.win_config
 ---@field private create_buffer fun(keymap: (fun(bufnr: integer):nil)?):number
----@field private setup_autocmds_and_keymaps fun(bufnr: integer, keymaps: (fun(bufnr: integer): nil)?):nil
+---@field private setup_autocmds_and_keymaps fun(bufnr: integer):nil
 local M = {}
 
 function M.toggle_quick_menu(opts)
@@ -68,18 +68,15 @@ function M.getWindowOpts(opts)
     return opts
 end
 
-function M.create_buffer(keymap)
-    if keymap == nil then
-        return
-    end
+function M.create_buffer()
     local bufnr = vim.api.nvim_create_buf(false, true)
-    M.setup_autocmds_and_keymaps(bufnr, keymap)
+    M.setup_autocmds_and_keymaps(bufnr)
     return bufnr
 end
 
 
 function M.import()
-    M.create_buffer(config.session.keymaps)
+    M.create_buffer()
     local lines = {}
     local ok, err = pcall(function ()
         local file = io.open(M.mng.project_path, "r")
@@ -129,7 +126,7 @@ function M.save()
     utils.LogInfo("Saved to " .. filepath)
 end
 
-function M.setup_autocmds_and_keymaps(bufnr, keymaps)
+function M.setup_autocmds_and_keymaps(bufnr)
     if vim.api.nvim_buf_get_name(bufnr) == "" then
         vim.api.nvim_buf_set_name(bufnr, "CudaProfilerSession")
     end
@@ -137,9 +134,7 @@ function M.setup_autocmds_and_keymaps(bufnr, keymaps)
         buf = bufnr,
     })
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
-    if keymaps ~= nil then
-        keymaps(bufnr)
-    end
+    config.session.keymaps(bufnr)
 end
 
 return M

@@ -1,5 +1,5 @@
 local utils = require("cuda-prof.utils")
-local config = require("cuda-prof.config").config
+local config = require("cuda-prof.config").opts
 
 ---@class CudaProfWrapper
 ---@field M.tools [string] Defined for extensibility

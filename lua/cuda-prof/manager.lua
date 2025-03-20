@@ -1,4 +1,4 @@
-local config = require("cuda-prof.config").config
+local config = require("cuda-prof.config").opts
 local utils = require("cuda-prof.utils")
 local uv = vim.uv or vim.loop
 
@@ -89,7 +89,7 @@ end
 ---@return string
 function M:resolveExperimentPath(filepaths)
     local experiment_path = self:resolveExperimentsPaths(
-        vim.fn.resolve(self.project .. "/.cuda-prof/experiments")
+        vim.fn.resolve(self.project_path .. "/.cuda-prof/experiments")
     )
     local experiment_name = self:resolveExperimentName(filepaths)
     return vim.fn.resolve(experiment_path .. experiment_name)
