@@ -36,21 +36,25 @@ local function parse_args(cmd, args)
     return result
 end
 
-function W:__call(args)
-    local cmd = parse_args(self.basecmd, args or {})
+local function general_call(basecmd, args)
+    local cmd = parse_args(basecmd, args or {})
     vim.system(cmd, {text = true}, function(out)
         if out.code == 0 then
-            utils.LogInfo(string.format("%s ran successfully.", self.basecmd))
+            utils.LogInfo(string.format("%s ran successfully.", basecmd))
             vim.notify(out.stdout, vim.log.levels.INFO)
         else
-            utils.LogError(string.format("%s failed with error code %s.", self.basecmd, out.code))
+            utils.LogError(string.format("%s failed with error code %s.", basecmd, out.code))
             vim.notify(out.stderr, vim.log.levels.ERROR)
         end
     end)
 end
 
+function W:__call(args)
+    general_call(self.basecmd, args)
+end
+
 function W:ui(args)
-    utils.LogNotImplemented("UI not implemented for this command")
+    general_call(self.basecmd .. "-ui", args)
 end
 
 ---@class NsightWrapper
@@ -68,22 +72,10 @@ function M.setup()
     if opts ~= nil then
         vim.list_extend(M.tools, opts)
     end
-
     for _, tool in ipairs(M.tools) do
         M[tool] = W:new(tool)
-    end
-
-    if M.ncu then
-        function M.ncu.ui(args)
-            local wrap = W:new("ncu-ui")
-            return wrap(args)
-        end
-    end
-
-    if M.nsys then
-        function M.nsys.ui(args)
-            local wrap = W:new("nsys-ui")
-            return wrap(args)
+        if vim.list_contains({"nvcc", "nvvp"}, tool) then
+            M[tool].ui = nil
         end
     end
 end
