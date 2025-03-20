@@ -39,7 +39,7 @@ end
 
 function M:sequence_trigger(filepaths)
     local resolved_name = self:resolveExperimentName(filepaths)
-    local cuda_prof_dir = vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
+    local cuda_prof_dir = vim.fn.resolve(self.project_path .. "/.nsight.nvim")
     if vim.fn.isdirectory(cuda_prof_dir) ~= 1 then
         vim.fn.mkdir(cuda_prof_dir, "p")
     end
@@ -86,7 +86,7 @@ end
 
 function M:resolveExperimentPath(filepaths)
     local experiment_path = self:resolveExperimentsPaths(
-        vim.fn.resolve(self.project_path .. "/.cuda-prof/experiments")
+        vim.fn.resolve(self.project_path .. "/.nsight.nvim/experiments")
     )
     local experiment_name = self:resolveExperimentName(filepaths)
     return vim.fn.resolve(experiment_path .. experiment_name)
@@ -110,7 +110,7 @@ function M:resolveExperimentsPaths(cudaProfPath)
 end
 
 function M:resolveCudaProfPath()
-    return vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
+    return vim.fn.resolve(self.project_path .. "/.nsight.nvim")
 end
 
 function M:setup()

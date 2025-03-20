@@ -26,9 +26,9 @@ end
 
 M.find_cuda_files = function(opts)
     opts = opts or {}
-    assert(ui.bufnr, "cuda-prof.ui buffer not initialized")
+    assert(ui.bufnr, "nsight.ui buffer not initialized")
     pickers.new(opts, {
-        prompt_title = "Add to CUDA Profiler Session",
+        prompt_title = "Add to Nsight Session",
         finder = finders.new_table {
             results = find_cuda_files(),
         },

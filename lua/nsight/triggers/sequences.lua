@@ -17,7 +17,7 @@ end
 
 function S:__call (filepath)
     if not S.routines then
-        utils.LogError("Routines not defined on cuda-prof#run_sequence")
+        utils.LogError("Routines not defined on nsight#run_sequence")
         return
     end
     for _, cuda_routine in ipairs(self.routines) do

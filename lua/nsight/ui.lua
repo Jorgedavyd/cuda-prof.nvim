@@ -10,7 +10,7 @@ local manager = require("nsight.manager")
 ---@field close_menu fun(): nil
 ---@field create_buffer fun(keymap: fun(bufnr: integer): nil): nil
 ---@field import fun(): nil
----@field save fun(): nil Implements saving into .cuda-prof_history (VimLeave)
+---@field save fun(): nil Implements saving into .nsight.nvim/.history
 ---@field toggle_quick_menu fun(opts: NsightWindowConfig):nil
 ---@field private getWindowOpts fun(opts: NsightWindowConfig): vim.api.keyset.win_config
 ---@field private create_buffer fun(keymap: (fun(bufnr: integer):nil)?):number
@@ -108,7 +108,7 @@ function M.save()
         return
     end
     local mng = manager:new()
-    local filepath = vim.fn.resolve(mng.project_path .. "/.cuda-prof/.config")
+    local filepath = vim.fn.resolve(mng.project_path .. "/.nsight.nvim/.config")
     local ok, err = pcall(function ()
         local file = io.open(filepath, "w")
         if file then
