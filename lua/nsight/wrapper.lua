@@ -21,6 +21,10 @@ local function parse_args(cmd, args)
         args = vim.split(args, " ")
     end
     local result = {cmd}
+    local opts = config.user_args[cmd] or nil
+    if opts ~= nil then
+        vim.list_extend(result, opts[cmd])
+    end
     vim.list_extend(result, args)
     return result
 end

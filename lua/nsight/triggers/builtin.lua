@@ -15,20 +15,4 @@ M.nvcc_nsys = trigger:new(sequences:new({
     end
 }))
 
-M.nvcc_ncu = trigger:new(sequences:new({
-    function ()
-    end
-}))
-
-M.nvcc_nvvp = trigger:new(sequences:new({
-    function ()
-    end
-}))
-
-M.nvcc = trigger:new(sequences:new({
-    function ()
-    end
-}))
-
-
 return M
