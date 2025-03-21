@@ -8,14 +8,6 @@ local config = require("cuda-prof.config").opts
 ---@field toggle_view fun():nil Opens the interactive session
 local M = {}
 
-setmetatable(M,{
-    __index = function (_, k)
-        local triggers = require("cuda-prof.triggers")
-        local default = require("cuda-prof.triggers.default")
-        return triggers and triggers[k] or default[k]
-    end
-})
-
 function M.toggle_include()
     local filepath = vim.fn.getcwd()
     if vim.endswith(filepath, 'cu') then

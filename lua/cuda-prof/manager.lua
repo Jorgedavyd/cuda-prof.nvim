@@ -1,6 +1,5 @@
 local config = require("cuda-prof.config").opts
 local utils = require("cuda-prof.utils")
-local uv = vim.uv or vim.loop
 
 ---@class CudaProfProjectManager Basically manages all IO operations and setting up experiments.
 ---@field new fun(self):CudaProfProjectManager
@@ -8,6 +7,13 @@ local uv = vim.uv or vim.loop
 ---@field setup fun(self, opts: table): nil Sets up the projects.
 ---@field sequence_trigger fun(self, filepaths: [string]): nil Creates the IO accessibility for the sequence trigger.
 ---@field check_filepaths fun(self, filepaths: [string]): nil If the lines check sanity standards
+---@field private resolve_project_path fun(self):string
+---@field private resolveNewReport fun(self, filepaths: [string]):string
+---@field private resolveCudaProfPath fun(self):string
+---@field private resolveExperimentName fun(self, resolved_filepaths: [string]):string
+---@field private resolveExperimentsPaths fun(self, cudaProfPath: string):string
+---@field private resolveExperimentPath fun(self, filepaths: [string]):string
+---@field private resolveExperimentHistoryPath fun(self, filepaths: [string]):string
 local M = {}
 M.__index = M
 
@@ -31,20 +37,26 @@ function M:check_filepaths(filepaths)
     end, filepaths)
 end
 
-
 function M:sequence_trigger(filepaths)
     local resolved_name = self:resolveExperimentName(filepaths)
-    local hyp_dir = vim.fn.resolve(self:resolveExperimentsPaths(vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim") .. resolved_name)
-    if vim.fn.isdirectory(hyp_dir) ~= 1 then
-        uv.fs_mkdir(hyp_dir)
-        uv.fs_mkdir(vim.fn.resolve(hyp_dir .. "/report1"))
+    local cuda_prof_dir = vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
+    if vim.fn.isdirectory(cuda_prof_dir) ~= 1 then
+        vim.fn.mkdir(cuda_prof_dir, "p")
+    end
+    local experiments_dir = self:resolveExperimentsPaths(cuda_prof_dir)
+    if vim.fn.isdirectory(experiments_dir) ~= 1 then
+        vim.fn.mkdir(experiments_dir, "p")
+    end
+    local experiment_dir = vim.fn.resolve(experiments_dir .. "/" .. resolved_name)
+    if vim.fn.isdirectory(experiment_dir) ~= 1 then
+        vim.fn.mkdir(experiment_dir, "p")
+        vim.fn.mkdir(vim.fn.resolve(experiment_dir .. "/report1"), "p")
         return
     end
     local new_report = self:resolveNewReport(filepaths)
-    uv.fs_mkdir(new_report)
+    vim.fn.mkdir(new_report, "p")
 end
 
----@return string
 function M:resolve_project_path()
     local current_dir = vim.fn.getcwd()
     local resolved_project = current_dir
@@ -66,27 +78,12 @@ function M:resolve_project_path()
     return resolved_project
 end
 
----@param resolved_filepaths [string]
----@return string
 function M:resolveExperimentName(resolved_filepaths)
     local ordered = vim.fn.sort(resolved_filepaths)
     local names = vim.tbl_map(function(k) return vim.fs.basename(k) end, ordered) --- probably got to implement a better way
     return table.concat(names, "_")
 end
 
----@param cudaProfPath string
----@return string
-function M:resolveExperimentsPaths(cudaProfPath)
-    return vim.fn.resolve(cudaProfPath .. "/experiments")
-end
-
----@return string
-function M:resolveCudaProfPath()
-    return vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
-end
-
----@param filepaths [string]
----@return string
 function M:resolveExperimentPath(filepaths)
     local experiment_path = self:resolveExperimentsPaths(
         vim.fn.resolve(self.project_path .. "/.cuda-prof/experiments")
@@ -95,8 +92,6 @@ function M:resolveExperimentPath(filepaths)
     return vim.fn.resolve(experiment_path .. experiment_name)
 end
 
----@param filepaths [string]
----@return string
 function M:resolveExperimentHistoryPath(filepaths)
     local experiment_path = self:resolveExperimentPath(filepaths)
     return vim.fn.resolve(experiment_path .. "/.history")
@@ -110,11 +105,33 @@ function M:resolveNewReport(filepaths)
     return vim.fn.resolve(experiment .. "report" .. num)
 end
 
---- This functions sets up the .cuda-prof.nvim workflow in the current project
+function M:resolveExperimentsPaths(cudaProfPath)
+    return vim.fn.resolve(cudaProfPath .. "/experiments")
+end
+
+function M:resolveCudaProfPath()
+    return vim.fn.resolve(self.project_path .. "/.cuda-prof.nvim")
+end
+
 function M:setup()
-    uv.fs_mkdir(self.project_path)
-    local experiment_path = self:resolveExperimentsPaths(vim.fn.resolve(self.project_path .. "/cuda-prof.nvim"))
-    uv.fs_mkdir(experiment_path)
+    local cuda_prof_path = self:resolveCudaProfPath()
+    if vim.fn.isdirectory(cuda_prof_path) ~= 1 then
+        vim.fn.mkdir(cuda_prof_path, "p")
+    end
+
+    local experiments_path = self:resolveExperimentsPaths(cuda_prof_path)
+    if vim.fn.isdirectory(experiments_path) ~= 1 then
+        vim.fn.mkdir(experiments_path, "p")
+    end
+
+    local config_path = vim.fn.resolve(cuda_prof_path .. "/.config")
+    if vim.fn.filereadable(config_path) ~= 1 then
+        local file = io.open(config_path, "w")
+        if file then
+            file:write("# CUDA Profiler configuration\n")
+            file:close()
+        end
+    end
 end
 
 return M

@@ -1,6 +1,6 @@
 <div align="center">
 
-# cuda-prof.nvim
+# nsight.nvim
 ###### A NVIDIA CUDA Profiling Tools wrapper for Neovim.
 <img height="480" src="/assets/cuda-prof-logo.png" />
 
