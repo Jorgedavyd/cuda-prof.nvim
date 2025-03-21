@@ -16,20 +16,9 @@ function W:new(basecmd)
     return setmetatable(instance, { __index = self })
 end
 
-function string.split(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local t = {}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
 local function parse_args(cmd, args)
     if type(args) == "string" then
-        args = string.split(args, " ")
+        args = vim.split(args, " ")
     end
     local result = {cmd}
     vim.list_extend(result, args)

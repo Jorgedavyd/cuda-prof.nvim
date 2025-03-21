@@ -1,32 +1,34 @@
 local wrapper = require("nsight.wrapper")
+local trigger = require("nsight.triggers.init")
+local sequences = require("nsight.triggers.sequences")
 
----@class NsightBuiltinTriggers
----@field private wrapper_ fun():nil
----@field __call fun():nil
+---@class NsightBuiltinTrigger
+---@field nvcc_nsys NsightTriggers
+---@field nvcc_ncu NsightTriggers
+---@field nvcc_nvvp NsightTriggers
+---@field nvcc NsightTriggers
+local M = {}
 
----@type NsightBuiltinTriggers
-local nsys_trigger = {
-    wrapper_ = wrapper.nsys.__call,
-    __call = function()
+M.nvcc_nsys = trigger:new(sequences:new({
+    function ()
+        wrapper.nvcc("")
     end
-}
+}))
 
----@type NsightBuiltinTriggers
-local nvcc_trigger = {
-    wrapper_ = wrapper.nvcc.__call,
-    __call = function()
+M.nvcc_ncu = trigger:new(sequences:new({
+    function ()
     end
-}
+}))
 
----@type NsightBuiltinTriggers
-local ncu_trigger = {
-    wrapper_ = wrapper.ncu.__call,
-    __call = function()
-        self.wrapper_()
+M.nvcc_nvvp = trigger:new(sequences:new({
+    function ()
     end
-}
+}))
 
-return {
-    nvcc_trigger = nvcc_trigger,
-    ncu_trigger = ncu_trigger,
-}
+M.nvcc = trigger:new(sequences:new({
+    function ()
+    end
+}))
+
+
+return M

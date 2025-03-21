@@ -7,6 +7,13 @@ local M = {}
 ---@field session NsightSessionConfig
 ---@field extensions NsightExtensionConfig
 ---@field keymaps fun(buf): nil Configure the keymaps on CUDA file attachement.
+---@field user_args NsightUserArgs
+
+---@class NsightUserArgs
+---@field nvcc table<string, string>
+---@field nvvp table<string, string>
+---@field ncu table<string, string>
+---@field nsys table<string, string>
 
 ---@class NsightExtensionConfig
 ---@field cli [string]
@@ -44,8 +51,15 @@ M.opts = {
     },
     keymaps = function (bufnr)
         vim.keymap.set("n", "<leader>cu", "echo Hola", {buffer = bufnr})
-    end
+    end,
+    user_args = {
+        nvcc = {},
+        nsys = {},
+        ncu = {},
+        nvvp = {},
+    }
 }
+
 
 function M.setup(opts)
     opts = opts or {}
